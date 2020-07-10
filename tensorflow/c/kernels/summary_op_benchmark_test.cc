@@ -43,15 +43,22 @@ static Graph* BM_ScalarSummaryOp(TensorShape shape, const char* tag,
 // Macro used to create benchmarking functions with a particular shape,
 // tag, and value.  
 #define DIMARGS(...) {__VA_ARGS__, 0}
+#define LONGTAGPARAM LONGTAG____________________________ 
+#define LARGEVALUEPARAM 2352352.2623433
 
-#define BM_ScalarSummaryDev(device, dims, shape, tag, value)       		\ 
-	static void BM_ScalarSummaryShape_##shape##_##device(int iters) { 	\
+#define BM_ScalarSummaryDev(device, dims, name, tag, value)       		\ 
+	static void BM_ScalarSummary_##name##_##device(int iters) { 	\
 		TensorShape tensorshape(DIMARGS(dims)); 													\
 		test::Benchmark(#device, BM_ScalarSummaryOp(											\
 				tensorshape, #tag, value)).Run(iters); 												\
 	}																																		\
-	BENCHMARK(BM_ScalarSummaryShape_##shape##_##device); 
-	
-BM_ScalarSummaryDev(cpu, (5, 10, 100), 5_10_100, tag, 5.2);
-BM_ScalarSummaryDev(cpu, (500, 1000, 10000), 500_1000_10000, tag, 5.2);
+	BENCHMARK(BM_ScalarSummary_##name##_##device); 
+
+BM_ScalarSummaryDev(cpu, (5, 10, 100), Base, tag, 5.2);
+// Benchmark for large shapes 
+BM_ScalarSummaryDev(cpu, (500, 1000, 10000), Large_Shape, tag, 5.2);
+// Benchmark for large tag tstring 
+BM_ScalarSummaryDev(cpu, (5, 10, 100), Long_Tag, LONGTAGPARAM, 5.2);
+// Benchmark for large values 
+BM_ScalarSummaryDev(cpu, (500, 1000, 10000), Large_Value, tag, LARGEVALUEPARAM);
 } // namespace tensorflow
