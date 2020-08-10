@@ -25,6 +25,7 @@ limitations under the License.
 #include <memory>
 #include <string>
 #include <utility>
+#include <iostream>
 
 #include "absl/container/inlined_vector.h"
 #include "third_party/eigen3/unsupported/Eigen/CXX11/Tensor"
@@ -339,6 +340,55 @@ TEST(TestKernel, TestHostMemory) {
   TF_DeleteStatus(status);
   TF_DeleteKernelBuilder(builder);
   ASSERT_TRUE(delete_called);
+}
+
+TEST(TestKernel, TF_OpKernelContext_SetStatus) {
+  const char* node_name = "SomeNodeName";
+  const char* op_name = "SetStatusOp";
+  const char* device_name = "FakeDeviceName3";
+
+  REGISTER_OP(op_name)
+      .Input("input1: float")
+      .Input("input2: float")
+      .Output("output1: float")
+      .Attr("SomeDataTypeAttr: type");
+
+  auto my_compute_func = [](void* kernel, TF_OpKernelContext* ctx) {
+    TF_Status* s = TF_NewStatus();
+    TF_SetStatus(s, TF_INVALID_ARGUMENT, "Testing TF_OpKernelContext_SetStatus"); 
+    TF_OpKernelContext_SetStatus(ctx, s); 
+    TF_DeleteStatus(s);
+  };
+
+  TF_KernelBuilder* builder = TF_NewKernelBuilder(op_name, device_name, nullptr,
+                                                  my_compute_func, nullptr);
+  {
+    TF_Status* status = TF_NewStatus();
+    TF_RegisterKernelBuilder(node_name, builder, status);
+    EXPECT_EQ(TF_OK, TF_GetCode(status));
+    TF_DeleteStatus(status);
+  }
+
+  OpKernelContext::Params p;
+  DummyDevice dummy_device(nullptr);
+  p.device = &dummy_device;
+  gtl::InlinedVector<TensorValue, 4> inputs;
+  // Simulate 2 inputs
+  inputs.emplace_back();
+  inputs.emplace_back();
+  p.inputs = &inputs;
+
+  Status status;
+  std::unique_ptr<OpKernel> kernel =
+      GetFakeKernel(device_name, op_name, node_name, &status);
+  TF_EXPECT_OK(status);
+  ASSERT_NE(nullptr, kernel.get());
+
+  p.op_kernel = kernel.get();
+  OpKernelContext ctx(&p);
+  kernel->Compute(&ctx);
+  EXPECT_EQ("Invalid argument: Testing TF_OpKernelContext_SetStatus", 
+             ctx.status().ToString()); 
 }
 
 class DeviceKernelOpTest : public OpsTestBase {

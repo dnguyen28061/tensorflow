@@ -216,6 +216,13 @@ void TF_OpKernelConstruction_Failure(TF_OpKernelConstruction* ctx,
   cc_ctx->CtxFailure(s);
 }
 
+void TF_OpKernelContext_SetStatus(TF_OpKernelContext* ctx, 
+                                  TF_Status* status) { 
+  auto* cc_ctx = reinterpret_cast<::tensorflow::OpKernelContext*>(ctx);
+  ::tensorflow::Status s(::tensorflow::StatusFromTF_Status(status));
+  cc_ctx->SetStatus(s); 
+}
+
 void TF_OpKernelContext_Failure(TF_OpKernelContext* ctx, TF_Status* status) {
   auto* cc_ctx = reinterpret_cast<::tensorflow::OpKernelContext*>(ctx);
   ::tensorflow::Status s(::tensorflow::StatusFromTF_Status(status));

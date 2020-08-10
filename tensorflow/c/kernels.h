@@ -159,6 +159,9 @@ TF_CAPI_EXPORT extern void TF_OpKernelConstruction_Failure(
 TF_CAPI_EXPORT extern void TF_OpKernelContext_Failure(TF_OpKernelContext* ctx,
                                                       TF_Status* status);
 
+TF_CAPI_EXPORT extern void TF_OpKernelContext_SetStatus(TF_OpKernelContext* ctx, 
+                                                        TF_Status* status); 
+
 // Returns the expected output data type of the ith output. If i < 0 or
 // i >= TF_NumOutputs(ctx), the program aborts.
 TF_CAPI_EXPORT extern TF_DataType TF_ExpectedOutputDataType(
