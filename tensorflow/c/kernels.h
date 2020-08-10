@@ -189,6 +189,10 @@ TF_CAPI_EXPORT extern void TF_OpKernelConstruction_GetAttrInt32(
 TF_CAPI_EXPORT extern TF_StringView TF_OpKernelConstruction_GetName(
     TF_OpKernelConstruction* ctx);
 
+// Returns true if attr_name is defined in the node definition of ctx. 
+TF_CAPI_EXPORT bool TF_OpKernelConstruction_HasAttr(
+    TF_OpKernelConstruction* ctx, TF_StringView attr_name); 
+
 // Allocates Tensor for output at given index. Caller takes ownership of
 // returned TF_Tensor and should deallocate it using TF_DeleteTensor(tensor).
 //

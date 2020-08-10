@@ -16,6 +16,7 @@ limitations under the License.
 #include "tensorflow/c/kernels.h"
 
 #include <memory>
+#include <string>
 
 #include "tensorflow/c/c_api_internal.h"
 #include "tensorflow/c/tf_status_helper.h"
@@ -245,6 +246,13 @@ TF_StringView TF_OpKernelConstruction_GetName(TF_OpKernelConstruction* ctx) {
   string_view_of_name.data = cc_ctx->def().name().data();
   string_view_of_name.len = cc_ctx->def().name().length();
   return string_view_of_name;
+}
+
+bool TF_OpKernelConstruction_HasAttr(TF_OpKernelConstruction* ctx, 
+                                     TF_StringView attr_name) { 
+  auto* cc_ctx = reinterpret_cast<tensorflow::OpKernelConstruction*>(ctx); 
+  return cc_ctx->def().attr().find(std::string(attr_name.data, 
+      attr_name.len)) != cc_ctx->def().attr().end(); 
 }
 
 TF_DataType TF_ExpectedOutputDataType(TF_OpKernelContext* ctx, int i) {

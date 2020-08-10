@@ -65,6 +65,13 @@ static void* MyCreateFunc(TF_OpKernelConstruction* ctx) {
   s->created = true;
   s->compute_called = false;
 
+  // Test TF_OpKernelConstruction_HasAttr 
+  TF_StringView attr_name; 
+  attr_name.data = "SomeDataTypeAttr"; 
+  // length of SomeDataTypeAttr; 
+  attr_name.len = 16; 
+  EXPECT_TRUE(TF_OpKernelConstruction_HasAttr(ctx, attr_name)); 
+  
   // Exercise attribute reads.
   TF_DataType type;
   TF_Status* status = TF_NewStatus();
